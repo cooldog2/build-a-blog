@@ -26,18 +26,16 @@ class Handler(webapp2.RequestHandler):
 
 #====add the database -Define the entity by creating a class; inherits from import db, model defines the id
 class Post(db.Model):
-    title = db.StringProperty(required = True)    # "required = True" is a constratint:indicates that
-                                                  #  a StringProperty is required to create an instance of Post class
+     # "required = True" is a constratint:indicates that a StringProperty is
+    #  required to create an instance of Post class
+    title = db.StringProperty(required = True)
     post = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
-
 
 #writes output to the browser
 class MainPage(Handler):
      #render forms while preserving fields
     def render_front(self):
-
-        # new - can create seperate handler for /blog
         posts = db.GqlQuery("SELECT * FROM Post "         #throws an ERROR if there's not a space after Post and ending quote
                             "ORDER BY created DESC limit 5 ")
         # pass infornation to our template
@@ -50,10 +48,7 @@ class MainPage(Handler):
 class NewPost(Handler):
      #render forms while preserving fields
     def render_newpost(self, title = "", post = "", error = ""):
-
-        # pass infornation to our template
         self.render("newpost.html", title = title, post = post, error = error)
-
     #render the blank form
     def get(self):
         self.render_newpost()
@@ -62,33 +57,31 @@ class NewPost(Handler):
         title = self.request.get("title")  #what user typed
         post = self.request.get("post")
 
-        # if title and post:
         if title and post:
-            #self.write("Thanks")
             a = Post(title = title, post = post) #creating a new instance of art (datetime is autocreated so no need to pass it in)
             a.put() #stores new art object in the database
-            #getid of new post
             blogid = a.key().id()
-            self.redirect("/Blog/%s"% blogid)
+            self.redirect("/Blog/%s"% str(blogid))
         else:
             error = "we need both a title and post!."
-            #self.render("front.html", error = error)    # put into a seperate function because it will be called from both Get & Post - to avoid having to repeat code
-                                                         #new function name is render_front
-          #replace above line with this one This renders form with the error message
-          #if there is an error, returns what user typed in + the error message
+        # renders form with the error message; if error return what was entered plus error message
             self.render_newpost(title, post, error)
 
 class BlogPage(Handler):
     def get(self, id):
         #look up the blog post: get id using function get_by_id & convert id to integer
         blogpost = Post.get_by_id(int(id))
-        #send the name of the page and the post
-        if blogpost:
-            # self.render("BlogPage.html", blogpost)
-            self.render("BlogPage.html", blogpost = blogpost)
+        if blogpost == None:
+            error = "The id is not valid"
+            self.response.write(error)
+            # self.render("BlogPage.html", blogpost = blogpost)
+        else:
+            self.response.write(blogpost.title)
+            self.response.write("<br>")
+            self.response.write(blogpost.post)
 
-
-app = webapp2.WSGIApplication([('/', MainPage),
-    ('/Blog/<id:\d+>', BlogPage),
+app = webapp2.WSGIApplication([
+    ('/', MainPage),
+    webapp2.Route('/Blog/<id:\d+>', BlogPage),
     ('/Blog/newpost', NewPost)
     ], debug=True)

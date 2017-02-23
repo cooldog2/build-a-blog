@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-<!-- this is the FRONT.HTML -->
 
-      {% for post in posts %}   <!-- accessing the query. Curly brackets used by jinja2 to separate html from python  -->
+<!-- accessing the query. Curly brackets used by jinja2 to separate html from python  -->
+      {% for post in posts %}
         <div class = "post">
-          <div class = "post-title">{{post.title}} </div>
+          <!-- <div class = "post-title">{{post.title}} </div> -->
+          <h2>  <a href = "/Blog/{{post.key().id()}}">{{post.title}} </a> </h2>
           <div class = "post-body">{{post.post}}</div>
         </div>
       {% endfor %}

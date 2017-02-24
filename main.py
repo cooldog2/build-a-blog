@@ -74,11 +74,8 @@ class BlogPage(Handler):
         if blogpost == None:
             error = "The id is not valid"
             self.response.write(error)
-            # self.render("BlogPage.html", blogpost = blogpost)
         else:
-            self.response.write(blogpost.title)
-            self.response.write("<br>")
-            self.response.write(blogpost.post)
+            self.render("blogPage.html", blogpost=blogpost)
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
